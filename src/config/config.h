@@ -21,7 +21,7 @@ namespace config {
 /// Max number of extruders/tools/slots
 /// Beware - if you change this, the EEPROM structure will become invalid and no migration procedures have been implemented.
 /// So if you really have to change this, erase your EEPROM content then.
-static constexpr const uint8_t toolCount = 5U;
+static constexpr const uint8_t toolCount = 10U;
 static_assert(toolCount < 15, "Up to 14 valid slots (+1 parking) is supported in EEPROM storage");
 
 // Printer's filament sensor setup
@@ -47,7 +47,7 @@ static constexpr const uint8_t buttonsADCIndex = 5; ///< ADC index of buttons in
 
 // VCC measurement setup
 static constexpr const uint8_t VCCADCIndex = 30; ///< ADC index of scaled VCC input
-static constexpr const uint16_t VCCADCThreshold = 274; ///< ADC value for triggering the UV_VCC error
+static constexpr const uint16_t VCCADCThreshold = 300; ///< ADC value for triggering the UV_VCC error
 /// We are measuring the bandgap voltage, Vb=1.1V.
 /// To compute the threshold value: `VAL = 1125.3 / AVCC`
 /// So for AVCC=4.1V, you get VAL=274.46
@@ -147,14 +147,14 @@ static constexpr uint8_t selectorCutIRun = 40; ///< 660mA
 
 /// Selector motion limits
 static constexpr SelectorLimits selectorLimits = {
-    .lenght = 75.0_mm, // TODO how does this relate to SelectorOffsetFromMin?
+    .lenght = 145.0_mm, // TODO how does this relate to SelectorOffsetFromMin?
     .jerk = 1.0_mm_s,
     .accel = 200.0_mm_s2,
 };
 
 static constexpr U_mm SelectorSlotDistance = 14.0_mm; /// Selector distance between two slots
 static constexpr U_mm SelectorOffsetFromMax = 1.0_mm; /// Selector offset from home max to slot 0
-static constexpr U_mm SelectorOffsetFromMin = 75.5_mm; /// Selector offset from home min to slot 0
+static constexpr U_mm SelectorOffsetFromMin = 145.5_mm; /// Selector offset from home min to slot 0
 
 /// slots 0-4 are the real ones, the 5th is the farthest parking positions
 /// selector.dirOn = true = Home at max: selector hits left side of the MMU body
@@ -167,7 +167,12 @@ static constexpr U_mm selectorSlotPositions[toolCount + 1] = {
     SelectorOffsetFromMax + 2 * SelectorSlotDistance, ///1.0_mm + 2 * 14.0_mm = 29.0_mm
     SelectorOffsetFromMax + 3 * SelectorSlotDistance, ///1.0_mm + 3 * 14.0_mm = 43.0_mm
     SelectorOffsetFromMax + 4 * SelectorSlotDistance, ///1.0_mm + 4 * 14.0_mm = 57.0_mm
-    SelectorOffsetFromMax + 5 * SelectorSlotDistance ///1.0_mm + 5 * 14.0_mm = 71.0_mm
+    SelectorOffsetFromMax + 5 * SelectorSlotDistance, ///1.0_mm + 5 * 14.0_mm = 71.0_mm
+    SelectorOffsetFromMax + 6 * SelectorSlotDistance, ///1.0_mm + 6 * 14.0_mm = 85.0_mm
+    SelectorOffsetFromMax + 7 * SelectorSlotDistance, ///1.0_mm + 7 * 14.0_mm = 99.0_mm
+    SelectorOffsetFromMax + 8 * SelectorSlotDistance, ///1.0_mm + 8 * 14.0_mm = 113.0_mm
+    SelectorOffsetFromMax + 9 * SelectorSlotDistance, ///1.0_mm + 9 * 14.0_mm = 127.0_mm
+    SelectorOffsetFromMax + 10 * SelectorSlotDistance ///1.0_mm + 10 * 14.0_mm = 141.0_mm
 
     ///selector min positions
     //    SelectorOffsetFromMin - 1.0_mm - 0 * SelectorSlotDistance, ///75.5_mm - 1.0_mm - 0 * 14.0_mm = 74.5_mm
@@ -195,27 +200,37 @@ static constexpr AxisConfig idler = {
 
 /// Idler motion limits
 static constexpr IdlerLimits idlerLimits = {
-    .lenght = 225.0_deg,
+    .lenght = 270.0_deg,
     .jerk = 0.1_deg_s,
     .accel = 500.0_deg_s2,
 };
 
-static constexpr U_deg IdlerSlotDistance = 40.0_deg; /// Idler distance between two slots
-static constexpr U_deg IdlerOffsetFromHome = 18.0_deg; /// Idler offset from home to slots
+static constexpr U_deg IdlerSlotDistance = 30.0_deg; /// Idler distance between two slots
+static constexpr U_deg IdlerOffsetFromHome = 0.0_deg; /// Idler offset from home to slots
 
 /// Absolute positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
 /// Home ccw with 5th idler bearing facing selector
 static constexpr U_deg idlerSlotPositions[toolCount + 1] = {
-    IdlerOffsetFromHome + 5 * IdlerSlotDistance, /// Slot 0 at 218 degree after homing ///18.0_deg + 5 * 40.0_deg = 218.0_deg
-    IdlerOffsetFromHome + 4 * IdlerSlotDistance, /// Slot 1 at 178 degree after homing ///18.0_deg + 4 * 40.0_deg = 178.0_deg
-    IdlerOffsetFromHome + 3 * IdlerSlotDistance, /// Slot 2 at 138 degree after homing ///18.0_deg + 3 * 40.0_deg = 138.0_deg
-    IdlerOffsetFromHome + 2 * IdlerSlotDistance, /// Slot 3 at 98 degree after homing ///18.0_deg + 2 * 40.0_deg = 98.0_deg
-    IdlerOffsetFromHome + 1 * IdlerSlotDistance, /// Slot 4 at 58 degree after homing ///18.0_deg + 1 * 40.0_deg = 58.0_deg
+    IdlerOffsetFromHome + 10 * IdlerSlotDistance,/// Slot 0 at 318 degree after homing ///18.0_deg + 10 * 30.0_deg = 318.0_deg
+    IdlerOffsetFromHome + 9 * IdlerSlotDistance, /// Slot 1 at 288 degree after homing ///18.0_deg + 9 * 30.0_deg = 288.0_deg
+    IdlerOffsetFromHome + 8 * IdlerSlotDistance, /// Slot 2 at 258 degree after homing ///18.0_deg + 8 * 30.0_deg = 258.0_deg
+    IdlerOffsetFromHome + 7 * IdlerSlotDistance, /// Slot 3 at 228 degree after homing ///18.0_deg + 7 * 30.0_deg = 228.0_deg
+    IdlerOffsetFromHome + 6 * IdlerSlotDistance, /// Slot 4 at 198 degree after homing ///18.0_deg + 6 * 30.0_deg = 198.0_deg
+    IdlerOffsetFromHome + 5 * IdlerSlotDistance, /// Slot 5 at 168 degree after homing ///18.0_deg + 5 * 30.0_deg = 168.0_deg
+    IdlerOffsetFromHome + 4 * IdlerSlotDistance, /// Slot 6 at 138 degree after homing ///18.0_deg + 4 * 30.0_deg = 138.0_deg
+    IdlerOffsetFromHome + 3 * IdlerSlotDistance, /// Slot 7 at 108 degree after homing ///18.0_deg + 3 * 30.0_deg = 108.0_deg
+    IdlerOffsetFromHome + 2 * IdlerSlotDistance, /// Slot 8 at 78 degree after homing ///18.0_deg + 2 * 30.0_deg = 78.0_deg
+    IdlerOffsetFromHome + 1 * IdlerSlotDistance, /// Slot 9 at 48 degree after homing ///18.0_deg + 1 * 30.0_deg = 48.0_deg
     IdlerOffsetFromHome ///18.0_deg Fully disengaged all slots
 };
 
 /// Intermediate positions for Idler's slots: 0-4 are the real ones, the 5th index is the idle position
 static constexpr U_deg idlerIntermediateSlotPositions[toolCount + 1] = {
+    IdlerOffsetFromHome + 9.75F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 8.75F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 7.75F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 6.75F * IdlerSlotDistance,
+    IdlerOffsetFromHome + 5.75F * IdlerSlotDistance,
     IdlerOffsetFromHome + 4.75F * IdlerSlotDistance,
     IdlerOffsetFromHome + 3.75F * IdlerSlotDistance,
     IdlerOffsetFromHome + 2.75F * IdlerSlotDistance,
