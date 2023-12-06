@@ -47,7 +47,7 @@ static constexpr const uint8_t buttonsADCIndex = 5; ///< ADC index of buttons in
 
 // VCC measurement setup
 static constexpr const uint8_t VCCADCIndex = 30; ///< ADC index of scaled VCC input
-static constexpr const uint16_t VCCADCThreshold = 300; ///< ADC value for triggering the UV_VCC error
+static constexpr const uint16_t VCCADCThreshold = 274.46; ///< ADC value for triggering the UV_VCC error
 /// We are measuring the bandgap voltage, Vb=1.1V.
 /// To compute the threshold value: `VAL = 1125.3 / AVCC`
 /// So for AVCC=4.1V, you get VAL=274.46
