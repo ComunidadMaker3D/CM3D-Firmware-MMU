@@ -1,0 +1,75 @@
+name: tests
+
+on:
+  pull_request_target:
+    branches: [ main, MMU_* ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
+
+    steps:
+
+    # setup base required dependencies
+    - name: Setup dependencies
+      run: |
+          sudo apt-get update
+          sudo apt-get install gcc-11 g++11 lcov cmake ninja-build python3-pyelftools python3-regex python3-polib
+
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Checkout ${{ github.event.pull_request.head.ref }}
+      uses: actions/checkout@v4
+      if: ${{ github.event.pull_request }}
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        submodules: true
+
+    - name: Checkout ${{ github.event.ref }}
+      uses: actions/checkout@v4
+      if: ${{ !github.event.pull_request }}
+      with:
+        ref: ${{ github.event.ref }}
+        submodules: true
+
+    - name: Cache Dependencies
+      uses: actions/cache@v4
+      id: cache-pkgs
+      with:
+          path: ".dependencies"
+          key: "build-deps-1_0_0-linux"
+
+    - name: Setup build dependencies
+      run: |
+          ./utils/bootstrap.py
+
+    - name: Cache permissions
+      run: sudo chmod -R 744 .dependencies
+
+    - name: Build
+      id: tests_run
+      continue-on-error: true
+      run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja
+          ninja test_coverage_report
+
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Coverage
+        path: build/Coverage
+
+    - name: Add PR Comment
+      if: ${{ github.event.pull_request }}
+      uses: mshick/add-pr-comment@v2.8.2
+      with:
+        message-path: build/Summary.txt
+        message-id: "coverage"
+
+    - name: Report failure
+      if: steps.tests_run.outcome == 'failure'
+      run: echo ${{ steps.tests_run.outcome  }} && test -n ""

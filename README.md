@@ -1,5 +1,5 @@
-# Prusa-Firmware-MMU-Private
-This repository includes source code and firmware releases for the Original Prusa Multi Material Upgrade based on 8-bit ATMEL microcontroller.
+# Prusa-Firmware-MMU
+This repository includes source code and firmware releases for the Original Prusa Multi Material Unit based on 8-bit ATMEL microcontroller.
 
 The currently supported models are:
 - Original Prusa MMU3
@@ -41,7 +41,7 @@ Run `./utils/bootstrap.py`
 `bootstrap.py` will now download all the "missing" dependencies into the `.dependencies` folder:
 - clang-format-9.0.0-noext
 - cmake-3.22.5
-- ninja-1.10.2
+- ninja-1.12.1
 - avr-gcc-7.3.0
 
 ### How to build the preliminary project so far:
