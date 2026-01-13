@@ -95,10 +95,7 @@ static void setup2() {
     mb::buttons.Step();
 
     // Turn off all leds
-    for (uint8_t i = 0; i < config::toolCount; i++) {
-        ml::leds.SetMode(i, ml::green, ml::off);
-        ml::leds.SetMode(i, ml::red, ml::off);
-    }
+    ml::leds.SetAllOff();
     ml::leds.Step();
     mb::buttons.Step();
 
@@ -128,7 +125,7 @@ static void setup2() {
 
         // activate the correct LED if filament is present
         if (mg::globals.FilamentLoaded() > mg::FilamentLoadState::AtPulley) {
-            ml::leds.SetMode(mg::globals.ActiveSlot(), ml::green, ml::on);
+            ml::leds.ActiveSlotDonePrimed();
         }
     }
 

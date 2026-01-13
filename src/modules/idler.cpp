@@ -39,7 +39,7 @@ void Idler::PlanHomingMoveBack() {
 bool Idler::FinishHomingAndPlanMoveToParkPos() {
     // check the axis' length
     if (AxisDistance(mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>()))
-        < (config::idlerLimits.lenght.v - 10)) { //@@TODO is 10 degrees ok?
+        < uint16_t(config::idlerLimits.lenght.v - 10)) { //@@TODO is 10 degrees ok?
         return false; // we couldn't home correctly, we cannot set the Idler's position
     }
 
@@ -64,32 +64,12 @@ void Idler::FinishMove() {
 }
 
 bool Idler::StallGuardAllowed(bool forward) const {
-    const uint8_t checkDistance = forward ? 220 : 200;
+    const uint8_t checkDistance = forward ? 200 : 180;
     return AxisDistance(mm::axisUnitToTruncatedUnit<config::U_deg>(mm::motion.CurPosition<mm::Idler>())) > checkDistance;
 }
 
 Idler::OperationResult Idler::Disengage() {
-    if (state == Moving || IsOnHold()) {
-        dbg_logic_P(PSTR("Moving --> Disengage refused"));
-        return OperationResult::Refused;
-    }
-    plannedSlot = IdleSlotIndex();
-    plannedMove = Operation::disengage;
-
-    // coordinates invalid, first home, then disengage
-    if (!homingValid) {
-        PlanHome();
-        return OperationResult::Accepted;
-    }
-
-    // already disengaged
-    if (Disengaged()) {
-        dbg_logic_P(PSTR("Idler Disengaged"));
-        return OperationResult::Accepted;
-    }
-
-    // disengaging
-    return InitMovementNoReinitAxis();
+    return PlanMoveInner(IdleSlotIndex(), Operation::disengage);
 }
 
 Idler::OperationResult Idler::PartiallyDisengage(uint8_t slot) {
@@ -114,7 +94,7 @@ Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
         return OperationResult::Accepted;
     }
 
-    // coordinates invalid, first home, then engage
+    // coordinates invalid, first home, then engage or disengage
     // The MMU FW only decides to engage the Idler when it is supposed to do something and not while it is idle
     // so rebooting the MMU while the printer is printing (and thus holding the filament by the moving Idler)
     // should not be an issue
@@ -123,8 +103,8 @@ Idler::OperationResult Idler::PlanMoveInner(uint8_t slot, Operation plannedOp) {
         return OperationResult::Accepted;
     }
 
-    // already engaged
-    if (currentlyEngaged == plannedMove) {
+    // already engaged or disengaged
+    if (currentlyEngaged == plannedMove && currentSlot == plannedSlot) {
         return OperationResult::Accepted;
     }
 

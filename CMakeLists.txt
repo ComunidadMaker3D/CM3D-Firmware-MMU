@@ -159,12 +159,10 @@ set_target_properties(firmware PROPERTIES CXX_STANDARD 17)
 set_target_properties(firmware PROPERTIES INTERPROCEDURAL_OPTIMIZATION True)
 
 if(CMAKE_CROSSCOMPILING)
-  #[[
   # configure linker script
   set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/src/avr5.xn)
   target_link_options(firmware PUBLIC -Wl,-T,${LINKER_SCRIPT})
   add_link_dependency(firmware ${LINKER_SCRIPT})
-  #]]
 
   # limit the text section to 28K (32K - 4k reserved for the bootloader)
   target_link_options(firmware PUBLIC -Wl,--defsym=__TEXT_REGION_LENGTH__=28K)
@@ -183,7 +181,11 @@ if(CMAKE_CROSSCOMPILING)
     COMMAND ${CMAKE_OBJCOPY} firmware -O binary --gap-fill 0xFF --pad-to 0x00007000 firmware.bin
     COMMAND ${CMAKE_COMMAND} -E cat firmware.bin bootloader.bin > fw_bootloader.bin
     COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex fw_bootloader.bin
-            "MMU3_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}_bootloader.hex"
+            "MMU2S_MMU3_BOOTLOADER_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex"
+    COMMAND
+      ${CMAKE_COMMAND} -E copy
+      "MMU2S_MMU3_BOOTLOADER_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex"
+      "MMU2S_MMU3_BOOTLOADER_${PROJECT_VERSION}.hex"
     BYPRODUCTS bootloader.bin firmware.bin fw_bootloader.bin
     )
 
@@ -212,8 +214,14 @@ if(CMAKE_CROSSCOMPILING)
     POST_BUILD
     COMMAND
       ${CMAKE_COMMAND} -D WORK_DIR=${CMAKE_BINARY_DIR} -D
-      HEX_NAME="MMU3_${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex" -P
+      HEX_NAME="MMU2S_MMU3_FW${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex" -P
       ${CMAKE_SOURCE_DIR}/cmake/HexConcat.cmake DEPENDS firmware.hex
+    COMMAND
+      ${CMAKE_COMMAND} -E copy "MMU2S_MMU3_FW${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex"
+      "MMU2S_MMU3_FW${PROJECT_VERSION}.hex"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/autopublish
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "MMU2S_MMU3_FW${PROJECT_VERSION}${PROJECT_VERSION_SUFFIX_SHORT}.hex" "autopublish/"
     )
 
 endif()
